@@ -1,0 +1,9 @@
+.thStyle {
+    background-color: magenta;
+    border: 1px solid black
+  };
+
+.theadStyle {
+    display: table-header-group;
+    border: 1px solid black;
+  };

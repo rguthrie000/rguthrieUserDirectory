@@ -1,0 +1,17 @@
+.operations-table {
+    height: 270px;
+    overflow: scroll;
+}
+
+.log-button {
+    margin: 0 0 5px 360px;
+}
+.thLogStyle {
+    background-color: lightgray;
+    border: 1px solid black
+  };
+
+.theadLogStyle {
+    display: table-header-group;
+    border: 1px solid black;
+  };
