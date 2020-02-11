@@ -67,9 +67,9 @@ class UsersPage extends Component {
     }, () => this.sortOnCol(col,this.state.ascendingTrue));
   };
 
-  filterToRange = (min,max) => {
+  filterToRange = (column,min,max) => {
     let matchArr = [];
-    switch (this.state.columns[this.state.column]) {
+    switch (column) {
       case 'Yrs Member':
         matchArr = this.state.users.filter((u) => 
           ((u.registered.age >= min) && (u.registered.age <= max))
@@ -250,22 +250,24 @@ class UsersPage extends Component {
 
   handleFormSubmit = (event) => {
     event.preventDefault();
-    console.log('Form submit');
     let makeLogEntry = false;
     let matchCnt = this.state.users.length;
     if (this.state.matchStr) {
       matchCnt = this.matchOnCol();
       makeLogEntry = true;
     }
-    if (this.state.minValue || this.state.maxValue) {
-      let min = this.state.minValue? this.state.minValue : -1000000;
-      let max = this.state.maxValue? this.state.maxValue :  1000000;
-      matchCnt = this.filterToRange(min,max);
-      makeLogEntry = true;
+    let column = this.state.columns[this.state.column];
+    if (column === 'Yrs Member' || column === 'Age') {
+      if (this.state.minValue || this.state.maxValue) {
+        let min = this.state.minValue? this.state.minValue : -1000000;
+        let max = this.state.maxValue? this.state.maxValue :  1000000;
+        matchCnt = this.filterToRange(column,min,max);
+        makeLogEntry = true;
+      }
     }
     if (makeLogEntry) {
       let logObj = {
-        column      : this.state.columns[this.state.column],
+        column      : column,
         matchStr    : this.state.matchStr,
         minValue    : this.state.minValue,
         maxValue    : this.state.maxValue,
