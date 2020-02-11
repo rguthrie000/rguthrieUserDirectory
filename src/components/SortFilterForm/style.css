@@ -1,13 +1,21 @@
-.form > .sort-filter-form {
-  margin: 0px 0px 0px 0px;
+#sort-filter {
+  margin: 10px 0px 0px 0px;
+  padding: 2px 2px 2px 2px;
+  border: 1px solid black;
+}
+
+#form-filter {
+  margin: 10px 0px 0px 0px;
+  padding: 5px 0px 2px 2px;
+  border: 1px solid black;
 }
 
 .col-button {
   margin: 0px 0px 0px 10px;
 }
 
-.form {
-  margin: 20px;
+#col-selection {
+  margin: 0px 0px 0px 20px;
 }
 
 .form input {

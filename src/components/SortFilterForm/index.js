@@ -5,8 +5,8 @@ function SortFilterForm(props) {
   // Notice how each input has a `value`, `name`, and `onChange` prop
   return (
     <div>
-      <form className="form sort-filter-form">
-        <p>Column:  <strong>{props.columns[props.column]}</strong></p>
+      <form id="sort-filter" className="form sort-filter-form">
+        <p>Column:<h4 id="col-selection">{props.columns[props.column]}</h4></p>
         <p>Sort:</p>
         <div className="form-check">
           <label>
@@ -35,7 +35,7 @@ function SortFilterForm(props) {
           </label>
         </div>
       </form>
-      <form>
+      <form id="form-filter">
         <div>
           {((props.column !== 3) && (props.column !== 6)) ?
             (<div>
@@ -43,7 +43,7 @@ function SortFilterForm(props) {
                 value={props.matchStr}
                 name="matchStr"
                 type="text"
-                placeholder="match"
+                placeholder="pattern match"
                 onChange={props.handleFormChange}
               />
               <button className="btn btn-primary col-button" 
@@ -58,6 +58,8 @@ function SortFilterForm(props) {
                 placeholder="min"
                 onChange={props.handleFormChange}
               />
+              <button className="btn btn-primary col-button" 
+                onClick={props.handleFormSubmit}>Go!</button>
               <input
                 value={props.maxValue}
                 name="maxValue"
@@ -65,8 +67,6 @@ function SortFilterForm(props) {
                 placeholder="max"
                 onChange={props.handleFormChange}
               />
-              <button className="btn btn-primary col-button" 
-                onClick={props.handleFormSubmit}>Go!</button>
             </div>)}
         </div>
       </form>

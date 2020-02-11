@@ -10,7 +10,7 @@ class UsersPage extends Component {
   state = {
     users         : [],
     usersCopy     : [],
-    columns       : ['User','Last','First','Duration','City','State','Age','Gender','e-mail','SMS'],
+    columns       : ['User','Last','First','Yrs Member','City','State','Age','Gender','e-mail','SMS'],
     column        : 1,
     ascendingTrue : true,
     matchStr      : '',
