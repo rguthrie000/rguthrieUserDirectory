@@ -70,7 +70,7 @@ class UsersPage extends Component {
   filterToRange = (min,max) => {
     let matchArr = [];
     switch (this.state.columns[this.state.column]) {
-      case 'Duration':
+      case 'Yrs Member':
         matchArr = this.state.users.filter((u) => 
           ((u.registered.age >= min) && (u.registered.age <= max))
         );
@@ -179,7 +179,7 @@ class UsersPage extends Component {
           }  
         });
         break;
-      case 'Duration':
+      case 'Yrs Member':
         sortArr.sort( (u1,u2) => {
           if (ascending) { 
             return (parseInt(u1.registered.age) >= parseInt(u2.registered.age) ? 1: -1)
