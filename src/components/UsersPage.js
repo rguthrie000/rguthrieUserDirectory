@@ -1,12 +1,31 @@
+// rguthrie's User Directory -- Top-Level React file
+// Uses React without hooks (opportunity for re-factoring!)
+//
+// User Directory presents a list of users as rows in a table,
+// with columns for various personal information. The table rows
+// can be sorted based on any column, either ascending or descending.
+// The rows can also be filtered based on any column, with numeric
+// columns filtered on numeric range, and text columns filtered based
+// on match to a partial string. Results of filtering re-define the
+// list, with a history of filters displayed, and a Reset button
+// to restore the original list.
+
 import React, {Component} from "react";
+
+// API to get a set of random users
 import loadUsers          from "../utils/API";
+
+// Components of the page
 import TitleBox           from "./TitleBox";
 import SortFilterForm     from "./SortFilterForm";
 import OperationLog       from "./OperationLog";
 import UsersTableHead     from "./UsersTableHead";
 import UserRow            from "./UserRow";
 
+// UsersPage is a class descended from a react Component
 class UsersPage extends Component {
+
+  // 'global' variables  
   state = {
     users         : [],
     usersCopy     : [],
@@ -19,14 +38,17 @@ class UsersPage extends Component {
     operationLog  : []
   };
 
+  // Initialization
   componentDidMount = () => {
-    loadUsers().then( (res) => {
-      this.setState({
-        usersCopy: res.data.results
-      }, () => this.handleReset());
+    // fetch some users
+    loadUsers()
+    .then( (res) => {
+      // store the set in usersCopy, then call handleReset to finish initialization
+      this.setState({usersCopy: res.data.results}, () => this.handleReset());
     });  
   }
 
+  // handleReset() restores the Users Directory to the initial state
   handleReset = (event) => {
     if (event) {event.preventDefault();}
     this.setState({ 
@@ -40,36 +62,54 @@ class UsersPage extends Component {
     }, () => this.sortOnCol(1,true));
   }
 
+  // handleSortToggle() handles a change of the ascending/descending radio
+  // buttons as a toggle of the ascendingTrue variable, then sorts the 
+  // user table rows based on the selected column and the new sort 'direction'.
   handleSortToggle = () => {
     const newSortAscending = this.state.ascendingTrue? false: true;
     this.setState({
       ascendingTrue : newSortAscending
-    }, () => this.sortOnCol(this.state.column,newSortAscending));
+    }, 
+    // change of the sort direction, so re-sort
+    () => this.sortOnCol(this.state.column,newSortAscending));
   }
 
+  // handleFormChange() fetches filtering information from the page.
+  // This happens each time the form data changes.
   handleFormChange = (event) => {
     // Getting the value and name of the input which triggered the change
     const value = event.target.value;
     const name = event.target.name;
 
-    // Updating the input's state
+    // Update the state, which flows down to the components to cause
     this.setState({
       [name]: value
     });
   };
   
+  // handleColumn() implements the choice of a new column to be used
+  // as the reference for sorting and filtering.
   handleColumn = (col) => {
     this.setState({
       column    : col,
       matchStr  : '',
       minValue  : '',
       maxValue  : ''
-    }, () => this.sortOnCol(col,this.state.ascendingTrue));
+    }, 
+    // new column selected, sort on this column
+    () => this.sortOnCol(col,this.state.ascendingTrue));
   };
 
+  //***************************
+  // Sort / Filter 'block'
+
+  // filterToRange filters the users on a selected numeric column using min and
+  // max information supplied from the Form.
   filterToRange = (column,min,max) => {
     let matchArr = [];
     switch (column) {
+      // both cases use the same logic; the array filter() is used to return
+      // an array of rows which meet the filter's qualification criteria.
       case 'Yrs Member':
         matchArr = this.state.users.filter((u) => 
           ((u.registered.age >= min) && (u.registered.age <= max))
@@ -87,12 +127,18 @@ class UsersPage extends Component {
     }
   }
 
+  // matchOnCol() implements user row filtering by partial string match
+  // on the selected string column.
   matchOnCol = () => {
     let matchArr = [];
     let r = this.state.matchStr.toLowerCase();
     let s = '';
-    console.log(`matching ${this.state.columns[this.state.column]} on '${r}'`)
     switch (this.state.columns[this.state.column]) {
+
+      // all of these cases use the same logic -- use the array filter()
+      // method with the string match() method to identify rows whose
+      // string element in the selected column includes at least one 
+      // occurrence of the matchStr.
       case 'User':
         matchArr = this.state.users.filter((elt) => {
           s = elt.login.username.toLowerCase();
@@ -104,7 +150,6 @@ class UsersPage extends Component {
           s = elt.name.last.toLowerCase();
           return s.match(r) ? true : false;
         });
-        console.log(matchArr);
         break;
       case 'First':
         matchArr = this.state.users.filter((elt) => {
@@ -149,10 +194,16 @@ class UsersPage extends Component {
     return matchArr.length;
   }
 
+  // sortOnCol() implements sorting of the user rows based on the selected
+  // column and the chosen sort direction.
   sortOnCol = (col,ascending) => {
     let sortArr = this.state.users;
     switch (this.state.columns[col]) {
       case 'User':
+        // logic in each of these cases is the same; use the array of
+        // objects sort methodology, which requires a custom function
+        // to establish the bubble sort compare-adjacent-items relationship.
+        // only a positive result of the function causes a swap.
         sortArr.sort( (u1,u2) => {
           if (ascending) { 
             return (u1.login.username >= u2.login.username ? 1: -1)
@@ -248,23 +299,40 @@ class UsersPage extends Component {
     this.setState({users: sortArr});
   }
 
+  // handleFormSubmit() responds to the form submit button.
   handleFormSubmit = (event) => {
     event.preventDefault();
     let makeLogEntry = false;
     let matchCnt = this.state.users.length;
+
+    // Conditional Rendering in the SortFilterForm component
+    // only allows input of a match string when a string column
+    // is selected. 
     if (this.state.matchStr) {
+      // so a matchStr is present, and a string-based column has been selected.
+      // filter the rows based on presence of matchStr.
       matchCnt = this.matchOnCol();
+      // signal that an Operation Log entry will be needed.
       makeLogEntry = true;
     }
+
+    // when a numeric column has been selected, min and max fields
+    // are made available in the form.
     let column = this.state.columns[this.state.column];
-    if (column === 'Yrs Member' || column === 'Age') {
+    // make sure that a valid column for numeric filtering is selected
+    if ((column === 'Yrs Member') || (column === 'Age')) {     
       if (this.state.minValue || this.state.maxValue) {
+        // min or max or both have been supplied.  if only one of them,
+        // assign the other so that the missing one won't affect the filter.
         let min = this.state.minValue? this.state.minValue : -1000000;
         let max = this.state.maxValue? this.state.maxValue :  1000000;
+        // and run the numeric filter.
         matchCnt = this.filterToRange(column,min,max);
+        // signal that an Operation Log entry will be needed.
         makeLogEntry = true;
       }
     }
+    // Add this operation to the log.
     if (makeLogEntry) {
       let logObj = {
         column      : column,
@@ -273,6 +341,9 @@ class UsersPage extends Component {
         maxValue    : this.state.maxValue,
         usersRemain : matchCnt
       }
+      // the object is added to the end of the operationLog
+      // using the concatenation method because setState
+      // doesn't support the push() array method.
       let join = this.state.operationLog.concat(logObj);
       this.setState({
         operationLog : join,
@@ -283,6 +354,7 @@ class UsersPage extends Component {
     }
   };
 
+  // whew! ready to draw the page.
   render = () => {
     return (
       <div className="container">
